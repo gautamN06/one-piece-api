@@ -20,6 +20,8 @@ def create_crew_question(db, character):
     random.shuffle(possible_answers)
 
     return {
+        "character_id": character.id,
+        "question_type": "crew",
         "question":f"What crew does {character.name} belong to?",
         "answers":possible_answers
     }
@@ -42,6 +44,8 @@ def create_affiliation_question(db, character):
     random.shuffle(possible_answers)
 
     return {
+        "character_id": character.id,
+        "question_type": "affiliation",
         "question":f"What affiliation does {character.name} belong to?",
         "answers":possible_answers
     }
@@ -64,6 +68,8 @@ def create_devil_fruit_question(db, character):
     random.shuffle(possible_answers)
 
     return {
+        "character_id": character.id,
+        "question_type": "devil_fruit",
         "question":f"What Devil Fruit does {character.name} have?",
         "answers":possible_answers
     }
@@ -85,6 +91,8 @@ def create_bounty_question(db, character):
     random.shuffle(possible_answers)
 
     return {
+        "character_id": character.id,
+        "question_type": "bounty",
         "question": f"What is {character.name}'s bounty?",
         "answers": possible_answers
     }

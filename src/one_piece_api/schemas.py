@@ -11,4 +11,10 @@ class Character(BaseModel):
     bounty: int | None = None
     status: str 
 
+class QuizAnswer(BaseModel):
+    character_id : int 
+    question_type: str 
+    answer: str 
 
+class QuizSubmission(BaseModel):
+    answers: list[QuizAnswer]

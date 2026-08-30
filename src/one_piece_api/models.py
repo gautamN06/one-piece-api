@@ -16,5 +16,19 @@ class CharacterDB(Base):
     bounty: Mapped[int | None]
     status: Mapped[str]
 
+class QuizSession(Base):
+    __tablename__ = "quiz_sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+
+class QuizQuestion(Base):
+    __tablename__ = "quiz_questions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    quiz_id: Mapped[int]
+    character_id: Mapped[int]
+    question_type: Mapped[str]
 
 
