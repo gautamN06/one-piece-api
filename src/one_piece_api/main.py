@@ -176,24 +176,6 @@ def random_quiz():
 
     return question 
 
-@app.get("/characteres/random")
-def search_random():
-    db = SessionLocal()
-
-    character = db.query(CharacterDB).order_by(
-        func.random()
-    ).first()
-
-    db.close()
-
-    if character is None:
-        raise HTTPException(
-            status_code=404,
-            detail="No Characters in database! :("
-        )
-
-    return character 
-
 @app.get("/characters/search/{affiliation}")
 def search_affiliation(affiliation: str):
     db = SessionLocal()
@@ -295,7 +277,87 @@ def check_answer(quiz_answer: QuizAnswer):
 
     return {
         "correct": False, 
-        "message" : "Incorrect!"
+        "message" : "Incorrect!",
+        "correct_answer": correct_answer
+    }
+
+@app.post("/quiz/start")
+def start_quiz():
+    db = SessionLocal()
+
+    quiz_session = QuizSession()
+
+    db.add(quiz_session)
+    db.commit()
+    db.refresh(quiz_session)
+
+    questions = []
+    used_questions = set()
+
+    while len(questions) < 10:
+
+        question_type = random.choice([
+            "crew",
+            "affiliation",
+            "devil_fruit",
+            "bounty"
+        ])
+
+        if question_type == "crew":
+            character = db.query(CharacterDB).filter(
+                CharacterDB.crew.isnot(None)
+            ).order_by(
+                func.random()
+            ).first()
+
+        elif question_type == "affiliation":
+            character = db.query(CharacterDB).filter(
+                CharacterDB.affiliation.isnot(None)
+            ).order_by(
+                func.random()
+            ).first()
+
+        elif question_type == "devil_fruit":
+            character = db.query(CharacterDB).filter(
+                CharacterDB.devil_fruit.isnot(None)
+            ).order_by(
+                func.random()
+            ).first()
+
+        else:
+            character = db.query(CharacterDB).filter(
+                CharacterDB.bounty.isnot(None)
+            ).order_by(
+                func.random()
+            ).first()
+
+        question_key = (character.id, question_type)
+
+        if question_key in used_questions:
+            continue
+
+        used_questions.add(question_key)
+
+        if question_type == "crew":
+            question = create_crew_question(db, character)
+
+        elif question_type == "affiliation":
+            question = create_affiliation_question(db, character)
+
+        elif question_type == "devil_fruit":
+            question = create_devil_fruit_question(db, character)
+
+        elif question_type == "bounty":
+            question = create_bounty_question(db, character)
+
+        questions.append(question)
+
+    db.close()
+
+    return {
+        "quiz_id": quiz_session.id,
+        "total_questions": len(questions),
+        "questions": questions
     }
 
 @app.post("/quiz/submit")
