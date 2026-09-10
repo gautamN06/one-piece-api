@@ -2,19 +2,168 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, intial-scale=1.0">
-
-    <title>One Piece Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece Hub</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="quiz-container">
-        <h1>One Piece Quiz</h1>
-        <div id="quiz"></div>
-        <button id="next-button">Next</button>
+
+    <nav class="navbar">
+        <div class="nav-container">
+
+            <a href="#" class="logo">🏴‍☠️ One Piece Hub</a>
+
+            <div class="nav-links">
+                <a href="#" class="nav-link active">Home</a>
+                <a href="#" class="nav-link">Quiz</a>
+                <a href="#" class="nav-link">Characters</a>
+            </div>
+
+        </div>
+    </nav>
+
+
+    <main class="main-content">
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <p class="eyebrow">WELCOME TO THE GRAND LINE</p>
+
+                <h1>One Piece Hub</h1>
+
+                <p class="hero-description">
+                    Test your One Piece knowledge and explore characters
+                    from across the world of pirates.
+                </p>
+
+                <div class="hero-buttons">
+                    <button id="start-quiz-button" class="primary-button">
+                        Start Quiz
+                    </button>
+
+                    <button id="characters-button" class="secondary-button">
+                        Explore Characters
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="features">
+
+            <div class="feature-card">
+                <div class="feature-icon">⚔️</div>
+                <h2>Quiz</h2>
+                <p>
+                    Put your One Piece knowledge to the test with
+                    randomized questions.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🏴‍☠️</div>
+                <h2>Characters</h2>
+                <p>
+                    Search and explore characters, crews, affiliations,
+                    bounties, and more.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🌊</div>
+                <h2>Explore</h2>
+                <p>
+                    Discover information from across the world of
+                    One Piece.
+                </p>
+            </div>
+
+        </section>
+
+
+        <section id="quiz-section" class="page-section">
+
+            <div class="section-header">
+                <p class="eyebrow">TEST YOUR KNOWLEDGE</p>
+                <h2>One Piece Quiz</h2>
+            </div>
+
+            <div class="quiz-container">
+
+                <div id="quiz"></div>
+
+                <button id="next-button">
+                    Next
+                </button>
+
+            </div>
+
+        </section>
+
+    <section id="characters-section" class="page-section">
+
+     <div class="section-header">
+            <p class="eyebrow">EXPLORE THE WORLD</p>
+            <h2>Character Database</h2>
+
+            <p class="section-description">
+                Search through the One Piece character database.
+            </p>
+        </div>
+
+
+<div class="character-controls">
+
+    <div class="search-container">
+        <input
+            type="text"
+            id="character-search"
+            placeholder="Search characters..."
+        >
+
+        <button id="search-button">
+            Search
+        </button>
     </div>
 
+
+    <div class="filter-container">
+
+        <select id="crew-filter">
+            <option value="">All Crews</option>
+        </select>
+
+
+        <select id="affiliation-filter">
+            <option value="">All Affiliations</option>
+        </select>
+
+    </div>
+
+    </div>
+
+
+        <div id="character-results" 
+        class="character-grid"
+        ></div>
+
+    </section>
+
+    </main>
+
+
+    <footer>
+        <p>One Piece Hub • Built with FastAPI, PostgreSQL & JavaScript</p>
+    </footer>
+
+
     <script src="script.js"></script>
-    
+
 </body>
 </html>
+

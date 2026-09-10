@@ -10,6 +10,7 @@ class Character(BaseModel):
     devil_fruit_type: str | None = None
     bounty: int | None = None
     status: str 
+    image_url: str | None = None 
 
 class QuizAnswer(BaseModel):
     character_id : int 

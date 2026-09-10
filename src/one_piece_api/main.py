@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException 
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func 
 import random 
 
 from .database import SessionLocal, engine, Base 
 from .models import CharacterDB, QuizSession
 from .schemas import Character, QuizAnswer, QuizSubmission
+
 
 from .quiz import (
     create_crew_question,
@@ -18,36 +20,18 @@ print(Base.metadata.tables.keys())
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/character")
-def get_characters(
-    crew: str | None = None,
-    affiliation: str |None = None
-):
-    db = SessionLocal()
 
-    query = db.query(CharacterDB)
-
-    if crew:
-        query=query.filter(
-            CharacterDB.crew.ilike(f"%{crew}%")
-        )
-
-    if affiliation:
-        query=query.filter(
-            CharacterDB.affiliation.ilike(f"%{affiliation}%")
-        )
-
-    characters = query.all()
-
-    db.close()
-    if not characters: 
-        raise HTTPException(
-            status_code=404,
-            detail="No characters found! :("
-        )
-    
-    return characters 
 
 @app.get("/quiz")
 def create_quiz():
@@ -124,120 +108,6 @@ def create_quiz():
         "questions" : questions 
     }
 
-@app.get("/quiz/random")
-def random_quiz():
-    db = SessionLocal()
-
-    question_type = random.choice([
-        "crew",
-        "affiliation",
-        "devil_fruit",
-        "bounty"
-    ])
-
-    if question_type == "crew":
-        character = db.query(CharacterDB).filter(
-            CharacterDB.crew.isnot(None)
-        ).order_by(
-            func.random()
-        ).first()
-
-        question = create_crew_question(db, character)
-
-    elif question_type == "affiliation":
-        character = db.query(CharacterDB).filter(
-            CharacterDB.affiliation.isnot(None)
-        ).order_by(
-            func.random()
-        ).first()
-
-        question = create_affiliation_question(db, character)
-
-    elif question_type == "devil_fruit":
-        character = db.query(CharacterDB).filter(
-            CharacterDB.devil_fruit.isnot(None)
-        ).order_by(
-            func.random()
-        ).first()
-
-        question = create_devil_fruit_question(db, character)
-    
-    elif question_type == "bounty":
-        character = db.query(CharacterDB).filter(
-            CharacterDB.bounty.isnot(None)
-        ).order_by(
-            func.random()
-        ).first()
-
-        question = create_bounty_question(db, character)
-
-
-    db.close()
-
-    return question 
-
-@app.get("/characters/search/{affiliation}")
-def search_affiliation(affiliation: str):
-    db = SessionLocal()
-    characters = db.query(CharacterDB).filter(
-        CharacterDB.affiliation.ilike(f"%{affiliation}%")
-    ).all()
-    db.close() 
-    
-    if not characters:
-        raise HTTPException(
-            status_code=404,
-            detail="Members of this affiliation not found! :("
-        )
-    return characters 
-
-@app.get("/characters/{character_id}")
-def get_character(character_id: int):
-    db = SessionLocal()
-    character = db.query(CharacterDB).filter(
-        CharacterDB.id == character_id
-    ).first()
-    db.close()
-
-    if character is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Character not found!:("
-        )
-
-    return character 
-
-@app.get("/characters/search/{name}")
-def search_character(name: str):
-    db = SessionLocal()
-    characters = db.query(CharacterDB).filter(
-        CharacterDB.name.ilike(f"%{name}%")  #%{name}% - anything can come before and after name 
-        ).all()
-    db.close()
-
-    if not characters:
-        raise HTTPException(
-            status_code=404,
-            detail="No characters not found! :("
-        )
-    return characters
-
-
-@app.post("/characters/search/{crew}")
-def search_crew(crew: str):
-    db = SessionLocal()
-    characters = db.query(CharacterDB).filter(
-        CharacterDB.crew.ilike(f"%{crew}%")
-    ).all()
-    db.close()
-
-    if not characters:
-        raise HTTPException(
-            status_code=404,
-            detail="Not able to find crew! :("
-        )
-    return characters 
-
 @app.post("/quiz/answer")
 def check_answer(quiz_answer: QuizAnswer):
     db = SessionLocal()
@@ -281,132 +151,47 @@ def check_answer(quiz_answer: QuizAnswer):
         "correct_answer": correct_answer
     }
 
-@app.post("/quiz/start")
-def start_quiz():
+@app.get("/characters")
+def get_characters(
+    crew: str | None = None,
+    affiliation: str | None = None
+):
     db = SessionLocal()
 
-    quiz_session = QuizSession()
+    query = db.query(CharacterDB)
 
-    db.add(quiz_session)
-    db.commit()
-    db.refresh(quiz_session)
+    if crew:
+        query = query.filter(
+            CharacterDB.crew.ilike(f"%{crew}%")
+        )
 
-    questions = []
-    used_questions = set()
+    if affiliation:
+        query = query.filter(
+            CharacterDB.affiliation.ilike(f"%{affiliation}%")
+        )
 
-    while len(questions) < 10:
-
-        question_type = random.choice([
-            "crew",
-            "affiliation",
-            "devil_fruit",
-            "bounty"
-        ])
-
-        if question_type == "crew":
-            character = db.query(CharacterDB).filter(
-                CharacterDB.crew.isnot(None)
-            ).order_by(
-                func.random()
-            ).first()
-
-        elif question_type == "affiliation":
-            character = db.query(CharacterDB).filter(
-                CharacterDB.affiliation.isnot(None)
-            ).order_by(
-                func.random()
-            ).first()
-
-        elif question_type == "devil_fruit":
-            character = db.query(CharacterDB).filter(
-                CharacterDB.devil_fruit.isnot(None)
-            ).order_by(
-                func.random()
-            ).first()
-
-        else:
-            character = db.query(CharacterDB).filter(
-                CharacterDB.bounty.isnot(None)
-            ).order_by(
-                func.random()
-            ).first()
-
-        question_key = (character.id, question_type)
-
-        if question_key in used_questions:
-            continue
-
-        used_questions.add(question_key)
-
-        if question_type == "crew":
-            question = create_crew_question(db, character)
-
-        elif question_type == "affiliation":
-            question = create_affiliation_question(db, character)
-
-        elif question_type == "devil_fruit":
-            question = create_devil_fruit_question(db, character)
-
-        elif question_type == "bounty":
-            question = create_bounty_question(db, character)
-
-        questions.append(question)
+    characters = query.all()
 
     db.close()
 
-    return {
-        "quiz_id": quiz_session.id,
-        "total_questions": len(questions),
-        "questions": questions
-    }
+    return characters
 
-@app.post("/quiz/submit")
-def submit_quiz(quiz: QuizSubmission):
+@app.get("/characters/{character_id}")
+def get_character(character_id: int):
     db = SessionLocal()
+    character = db.query(CharacterDB).filter(
+        CharacterDB.id == character_id
+    ).first()
+    db.close()
 
-    score = 0 
+    if character is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Character not found!:("
+        )
 
-    for answer in quiz.answers: 
-        character = db.query(CharacterDB).filter(
-            CharacterDB.id == answer.character_id
-        ).first() 
+    return character 
 
-        if character is None:
-            db.close()
-            raise HTTPException(
-                status_code=404,
-                detail="Character not found!"
-            )
-
-        if answer.question_type == "crew":
-            correct_answer = character.crew 
-
-        elif answer.question_type == "affiliation":
-            correct_answer = character.affiliation 
-
-        elif answer.question_type == "devil_fruit":
-            correct_answer = character.devil_fruit
-
-        elif answer.question_type == "bounty":
-            correct_answer = character.bounty 
-
-        else:
-            db.close()
-            raise HTTPException(
-                status_code=404,
-                detail="Invalid question type!"
-            )
-
-        if str(correct_answer).lower() == answer.answer.lower():
-            score += 1
-
-    db.close() 
-
-    return {
-        "score":score,
-        "total":len(quiz.answers),
-        "percentage":(score/len(quiz.answers)) * 100 
-    }
 
 @app.post("/characters")
 def create_character(character: Character):
@@ -419,7 +204,8 @@ def create_character(character: Character):
         devil_fruit=character.devil_fruit,
         devil_fruit_type=character.devil_fruit_type, 
         bounty=character.bounty, 
-        status=character.status 
+        status=character.status,
+        image_url = character.image_url
     )
     db.add(new_character)
     db.commit()
@@ -451,6 +237,7 @@ def update_character(character_id: int, character: Character):
     db_character.devil_fruit_type = character.devil_fruit_type
     db_character.bounty = character.bounty 
     db_character.status = character.status 
+    db_character.image_url = character.image_url
 
     db.commit()
     db.refresh(db_character)

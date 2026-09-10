@@ -7,5 +7,9 @@ SQLite, Pydantic, uv
 -Delete Characters
 -Get All Characters
 
+##### ADDED 9/9/26 #### 
+can view website and filter characters from databse
+can play quiz on website
+better UI
 
 IN PROGRESS!!!! 

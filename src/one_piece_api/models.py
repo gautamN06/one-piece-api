@@ -15,6 +15,7 @@ class CharacterDB(Base):
     devil_fruit_type: Mapped[str | None]
     bounty: Mapped[int | None]
     status: Mapped[str]
+    image_url: Mapped[str | None]
 
 class QuizSession(Base):
     __tablename__ = "quiz_sessions"
